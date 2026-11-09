@@ -1,0 +1,5 @@
+fastapi[standard]
+httpx
+python-dotenv
+gradio
+pydantic-settings
