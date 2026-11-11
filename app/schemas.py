@@ -28,9 +28,15 @@ class GenerateRequest(BaseModel):
         "Natural"
     ]
 
-    primary_color: str
+    primary_color: Literal[
+        "Black", "White", "Beige", "Brown", "Green",
+        "Blue", "Pink", "Red", "Gold"
+    ]
 
-    secondary_color: str
+    secondary_color: Literal[
+        "Black", "White", "Beige", "Brown", "Green",
+        "Blue", "Pink", "Red", "Gold"
+    ]
 
     aspect_radio: Literal[
         "1:1",

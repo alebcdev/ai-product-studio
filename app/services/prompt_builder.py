@@ -1,6 +1,6 @@
 from app.schemas import GenerateRequest
 
-STYELE_DESCRIPTIONS = {
+STYLE_DESCRIPTIONS = {
     "Minimalist": "clean minimalist composition, simple background, elegant lighting",
     "Luxury": "premium luxury advertising, sophisticated lighting, elegant composition",
     "Creative": "bold creative advertising, vibrant composition, artistic presentation",
@@ -8,7 +8,7 @@ STYELE_DESCRIPTIONS = {
 }
 
 def build_prompt(data: GenerateRequest) -> str:
-    style_description = STYELE_DESCRIPTIONS[data.style]
+    style_description = STYLE_DESCRIPTIONS[data.style]
 
     prompt = (
         f"Professional commercial product photography of {data.product_name}. "
