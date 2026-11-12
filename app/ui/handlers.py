@@ -38,13 +38,7 @@ def generate_creative(
         gr.update(value=None, visible=False),
         gr.update(value=None, visible=False),
         gr.update(value=None, visible=False),
-        gr.update(
-            value=(
-                "### Generating your creative\n\n"
-                "Your product direction is being turned into an advertising image."
-            ),
-            visible=True,
-        ),
+        gr.update(value=None, visible=False),
     )
 
     try:
@@ -65,7 +59,6 @@ def generate_creative(
         yield (
             gr.update(value=image_path, visible=True),
             gr.update(value=image_path, visible=True),
-            gr.update(value=image_path, visible=True),
             gr.update(
                 value=(
                     "### Your creative is ready\n\n"
@@ -74,11 +67,11 @@ def generate_creative(
                 ),
                 visible=True,
             ),
+            gr.update(value=None, visible=False),
         )
     except Exception:
         logger.exception("Creative generation failed")
         yield (
-            gr.update(value=None, visible=False),
             gr.update(value=None, visible=False),
             gr.update(value=None, visible=False),
             gr.update(
@@ -89,4 +82,5 @@ def generate_creative(
                 ),
                 visible=True,
             ),
+            gr.update(value=None, visible=False),
         )

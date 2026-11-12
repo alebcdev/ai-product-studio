@@ -1,5 +1,6 @@
 from typing import Literal
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, Field, field_validator
 
 class GenerateRequest(BaseModel):
     product_name: str = Field(
@@ -11,6 +12,17 @@ class GenerateRequest(BaseModel):
         min_length=5,
         max_length=300
     )
+
+    @field_validator("product_name", "description", mode="before")
+    @classmethod
+    def strip_text(cls, value: object) -> object:
+        if not isinstance(value, str):
+            return value
+
+        value = value.strip()
+        if not value:
+            raise ValueError("must not be empty or contain only whitespace")
+        return value
 
 
     category: Literal[
