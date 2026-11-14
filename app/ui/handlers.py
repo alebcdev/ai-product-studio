@@ -2,12 +2,14 @@
 
 import logging
 from collections.abc import Iterator
+from pathlib import Path
 
 import gradio as gr
 from PIL import Image
 
 from app.schemas import GenerateRequest
 from app.services.generation_service import generator_product_image
+from app.services.image_validator import validate_image_file
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +56,7 @@ def generate_creative(
         )
         progress(0.35, desc="Generating the image")
         image_path, _prompt = generator_product_image(request)
+        validate_image_file(Path(image_path))
         progress(1, desc="Creative ready")
 
         yield (

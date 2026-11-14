@@ -2,5 +2,9 @@ fastapi[standard]
 httpx
 python-dotenv
 gradio==6.31.0
+gradio_client==2.7.2
+Pillow
+pydantic
 pydantic-settings
 huggingface_hub
+pytest

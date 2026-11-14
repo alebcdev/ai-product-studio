@@ -1,8 +1,11 @@
 
-import pytest
-from unittest.mock import Mock
 from pathlib import Path
+from unittest.mock import Mock
 
+import pytest
+from pydantic import SecretStr
+
+from app.config import settings
 from app.services.image_generator import (
     ImageGenerator,
     ImageGenerationError,
@@ -146,3 +149,61 @@ def test_create_client_wraps_connection_errors(monkeypatch):
         match="currently unavailable",
     ):
         ImageGenerator._create_client()
+
+
+def test_create_client_without_token_passes_none_to_client(monkeypatch):
+    client_factory = Mock(return_value=Mock())
+    monkeypatch.setattr("app.services.image_generator.Client", client_factory)
+    monkeypatch.setattr(settings, "hf_token", None)
+
+    ImageGenerator._create_client()
+
+    client_factory.assert_called_once_with(
+        settings.hf_space_id,
+        token=None,
+        httpx_kwargs={"timeout": settings.hf_timeout_seconds},
+    )
+
+
+def test_create_client_passes_secret_token_value(monkeypatch):
+    client_factory = Mock(return_value=Mock())
+    monkeypatch.setattr("app.services.image_generator.Client", client_factory)
+    monkeypatch.setattr(settings, "hf_token", SecretStr("test-token"))
+
+    ImageGenerator._create_client()
+
+    client_factory.assert_called_once_with(
+        settings.hf_space_id,
+        token="test-token",
+        httpx_kwargs={"timeout": settings.hf_timeout_seconds},
+    )
+
+
+def test_connection_error_does_not_expose_token_in_message_or_logs(
+    monkeypatch, caplog
+):
+    secret_token = "test-token"
+
+    def mock_client(*args, **kwargs):
+        raise RuntimeError("Connection failed")
+
+    monkeypatch.setattr("app.services.image_generator.Client", mock_client)
+    monkeypatch.setattr(settings, "hf_token", SecretStr(secret_token))
+
+    with caplog.at_level("ERROR"):
+        with pytest.raises(ImageGenerationError) as error:
+            ImageGenerator._create_client()
+
+    assert secret_token not in str(error.value)
+    assert secret_token not in caplog.text
+
+
+def test_generation_error_does_not_expose_provider_details():
+    client = Mock()
+    client.predict.side_effect = RuntimeError("provider internals")
+    generator = ImageGenerator(client=client)
+
+    with pytest.raises(ImageGenerationError) as error:
+        generator.generate(prompt="Test prompt", aspect_radio="1:1")
+
+    assert str(error.value) == "The image provider failed to generate the image."

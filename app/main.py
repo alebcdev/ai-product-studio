@@ -1,5 +1,4 @@
 import logging
-import mimetypes
 from pathlib import Path
 from time import perf_counter
 
@@ -7,15 +6,22 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 import gradio as gr
-from PIL import Image
 
 from app.config import settings
 from app.schemas import GenerateRequest
+from app.security.rate_limiter import RateLimiter
 from app.services.generation_service import generator_product_image
 from app.services.image_generator import ImageGenerationError
+from app.services.image_validator import validate_image_file
 from app.ui.interface import CSS, THEME, demo
 
 logger = logging.getLogger(__name__)
+
+rate_limiter = RateLimiter(
+    max_requests=settings.rate_limit_requests,
+    window_seconds=settings.rate_limit_window_seconds,
+)
+
 
 app = FastAPI(
     title=settings.app_name,
@@ -33,19 +39,20 @@ def health_check():
 
 @app.post("/generate")
 async def generate_image(data: GenerateRequest, request: Request):
+    client_id = request.client.host if request.client else "unknown-client"
+    allowed, retry_after = rate_limiter.check(client_id)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Please try again later.",
+            headers={"Retry-After": str(retry_after)},
+        )
+
     started_at = perf_counter()
     try:
         image_path, _prompt = await run_in_threadpool(generator_product_image, data)
         path = Path(image_path)
-        with Image.open(path) as image:
-            image_format = image.format
-        media_type = (
-            Image.MIME.get(image_format, "")
-            if image_format
-            else mimetypes.guess_type(path.name)[0]
-        )
-        if not media_type or not media_type.startswith("image/"):
-            raise ImageGenerationError("The provider returned a non-image file.")
+        media_type = validate_image_file(path)
 
         return FileResponse(
             path=path,
@@ -64,9 +71,8 @@ async def generate_image(data: GenerateRequest, request: Request):
         ) from error
     finally:
         logger.info(
-            "Image request completed in %.3fs from %s",
+            "Image generation request completed in %.3fs",
             perf_counter() - started_at,
-            request.client.host if request.client else "unknown",
         )
 
 

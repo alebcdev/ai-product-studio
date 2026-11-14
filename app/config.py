@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     hf_token: SecretStr | None = None
     hf_concurrency_limit: int = Field(default=2, gt=0, le=10)
     hf_timeout_seconds: float = Field(default=120.0, gt=0, le=600)
+    rate_limit_requests: int = Field(default=5, gt=0)
+    rate_limit_window_seconds: float = Field(default=600.0, gt=0)
 
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / ".env",
