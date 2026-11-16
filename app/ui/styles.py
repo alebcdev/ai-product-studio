@@ -316,6 +316,52 @@ CSS = """
     max-width: 280px;
 }
 
+.generation-loading {
+    align-items: center;
+    background: #fbfcff;
+    border: 1px solid #dce4ff;
+    border-radius: 12px;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    margin: 8px 0 16px;
+    min-height: 300px;
+    text-align: center;
+}
+
+.generation-loading-content {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.generation-loading-spinner {
+    animation: studio-spin 900ms linear infinite;
+    border: 3px solid #dce4ff;
+    border-radius: 50%;
+    border-top-color: var(--studio-accent);
+    height: 34px;
+    margin-bottom: 16px;
+    width: 34px;
+}
+
+.generation-loading h3 {
+    font-size: 1rem;
+    margin: 0 0 5px;
+}
+
+.generation-loading p {
+    color: var(--studio-muted);
+    font-size: 0.83rem;
+    margin: 0;
+}
+
+@keyframes studio-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .result-image {
     margin: 8px 0 16px;
 }
@@ -445,6 +491,10 @@ CSS = """
     .centered-options label {
         transition: none;
     }
+
+    .generation-loading-spinner {
+        animation: none;
+    }
 }
 """
 
@@ -460,6 +510,16 @@ EMPTY_STATE = """
         <div class="empty-state-icon">✦</div>
         <h3>Your creative will appear here</h3>
         <p>Configure your product and generate your first advertising visual.</p>
+    </div>
+</div>
+"""
+
+LOADING_STATE = """
+<div class="generation-loading" role="status" aria-live="polite">
+    <div class="generation-loading-content">
+        <div class="generation-loading-spinner" aria-hidden="true"></div>
+        <h3>Generating your image...</h3>
+        <p>This may take a few moments.</p>
     </div>
 </div>
 """

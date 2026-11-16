@@ -33,6 +33,7 @@ def create_demo() -> gr.Blocks:
             ) = form_components
             (
                 empty_state,
+                loading_state,
                 image_output,
                 download_output,
                 status_output,
@@ -56,6 +57,9 @@ def create_demo() -> gr.Blocks:
                     download_output,
                     status_output,
                     empty_state,
+                    loading_state,
+                    generate_button,
+                    regenerate_button,
                 ],
                 show_progress="full",
             )
@@ -67,6 +71,9 @@ def create_demo() -> gr.Blocks:
                     download_output,
                     status_output,
                     empty_state,
+                    loading_state,
+                    generate_button,
+                    regenerate_button,
                 ],
                 show_progress="full",
             )

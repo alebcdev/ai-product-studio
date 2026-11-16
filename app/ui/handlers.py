@@ -33,18 +33,19 @@ def generate_creative(
     primary_color: str,
     secondary_color: str,
     aspect_radio: str,
-    progress: gr.Progress = gr.Progress(track_tqdm=True),
-) -> Iterator[tuple[dict, dict, dict, dict]]:
+) -> Iterator[tuple[dict, dict, dict, dict, dict, dict, dict]]:
     """Generate a creative while exposing clear UI states to Gradio."""
     yield (
         gr.update(value=None, visible=False),
         gr.update(value=None, visible=False),
         gr.update(value=None, visible=False),
         gr.update(value=None, visible=False),
+        gr.update(visible=True),
+        gr.update(interactive=False),
+        gr.update(interactive=False),
     )
 
     try:
-        progress(0.15, desc="Preparing your creative")
         request = GenerateRequest(
             product_name=product_name,
             description=description,
@@ -54,10 +55,8 @@ def generate_creative(
             secondary_color=secondary_color,
             aspect_radio=aspect_radio,
         )
-        progress(0.35, desc="Generating the image")
         image_path, _prompt = generator_product_image(request)
         validate_image_file(Path(image_path))
-        progress(1, desc="Creative ready")
 
         yield (
             gr.update(value=image_path, visible=True),
@@ -71,6 +70,9 @@ def generate_creative(
                 visible=True,
             ),
             gr.update(value=None, visible=False),
+            gr.update(visible=False),
+            gr.update(interactive=True),
+            gr.update(interactive=True),
         )
     except Exception:
         logger.exception("Creative generation failed")
@@ -86,4 +88,7 @@ def generate_creative(
                 visible=True,
             ),
             gr.update(value=None, visible=False),
+            gr.update(visible=False),
+            gr.update(interactive=True),
+            gr.update(interactive=True),
         )

@@ -3,7 +3,7 @@
 import gradio as gr
 
 from app.ui.options import ASPECT_RATIOS, CATEGORIES, COLORS, STYLES
-from app.ui.styles import EMPTY_STATE
+from app.ui.styles import EMPTY_STATE, LOADING_STATE
 
 
 def build_header() -> gr.HTML:
@@ -114,6 +114,7 @@ def build_result_panel() -> tuple:
             gr.HTML('<span class="result-badge">AI powered</span>')
 
         empty_state = gr.HTML(EMPTY_STATE)
+        loading_state = gr.HTML(LOADING_STATE, visible=False)
         image_output = gr.Image(
             label="Generated advertising image",
             type="filepath",
@@ -136,6 +137,7 @@ def build_result_panel() -> tuple:
 
     return (
         empty_state,
+        loading_state,
         image_output,
         download_output,
         status_output,
