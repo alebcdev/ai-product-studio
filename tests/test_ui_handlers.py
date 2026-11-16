@@ -58,3 +58,64 @@ def test_generate_creative_hides_loading_state_after_error(monkeypatch):
     assert updates[1][4]["visible"] is False
     assert updates[1][5]["interactive"] is True
     assert updates[1][2]["visible"] is True
+
+
+def test_generate_creative_uses_product_name_for_download(
+    monkeypatch, tmp_path
+):
+    updates = _updates(
+        monkeypatch,
+        tmp_path,
+        lambda request: (str(Path(tmp_path) / "generated.png"), "prompt"),
+    )
+
+    assert Path(updates[1][1]["value"]).name == "coffee.png"
+
+
+def test_generate_creative_normalizes_product_name_and_preserves_webp(
+    monkeypatch, tmp_path
+):
+    image_path = Path(tmp_path) / "generated.webp"
+    Image.new("RGB", (10, 10)).save(image_path, format="WEBP")
+    monkeypatch.setattr(
+        "app.ui.handlers.generator_product_image",
+        lambda request: (str(image_path), "prompt"),
+    )
+
+    updates = list(
+        generate_creative(
+            "  Café / Premium!  ",
+            "Roasted coffee",
+            "Food & Beverage",
+            "Minimalist",
+            "Black",
+            "Beige",
+            "1:1",
+        )
+    )
+
+    assert Path(updates[1][1]["value"]).name == "cafe-premium.webp"
+
+
+def test_generate_creative_uses_fallback_for_empty_product_name(
+    monkeypatch, tmp_path
+):
+    image_path = Path(tmp_path) / "generated.png"
+    Image.new("RGB", (10, 10)).save(image_path)
+    monkeypatch.setattr(
+        "app.ui.handlers.generator_product_image",
+        lambda request: (str(image_path), "prompt"),
+    )
+    updates = list(
+        generate_creative(
+            "!!!",
+            "Roasted coffee",
+            "Food & Beverage",
+            "Minimalist",
+            "Black",
+            "Beige",
+            "1:1",
+        )
+    )
+
+    assert Path(updates[1][1]["value"]).name == "generated-image.png"
