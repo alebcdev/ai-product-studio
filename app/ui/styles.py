@@ -426,6 +426,10 @@ CSS = """
     margin: 0;
 }
 
+footer {
+    display: none !important;
+}
+
 @media (max-width: 900px) {
     .studio-shell {
         padding: 22px 18px 28px;
